@@ -39,8 +39,13 @@ app.controller('chatCtrl', ['$scope', 'socket', '$timeout', function ($scope, so
 		if (!$scope.hasLogined || Object.keys(data).length == 0) return;
 
 		$scope.messages.push({user: data.nickname, type: 'bye'});
-		var index = $scope.users.indexOf(data.nickname);
-		$scope.users.splice(index, 1);
+
+		for (var i=0;i<$scope.users.length;i++){
+			if ($scope.users[i].nickname == data.nickname){
+				$scope.users.splice(i, 1);
+			}
+		}
+
 	});
 
 	//接收到新訊息
