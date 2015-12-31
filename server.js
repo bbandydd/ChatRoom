@@ -48,6 +48,17 @@ io.on('connection', function(socket){
 	//發送訊息
 	socket.on('addMessage', function(data){
 		socket.broadcast.emit('messageAdded', data);
+		socket.broadcast.emit('stop typing', {nickname: data.from});
+	});
+
+	//使用者輸入訊息
+	socket.on('typing', function(data){
+		socket.broadcast.emit('typing', {nickname: data.nickname, color: data.color, time: data.time});
+	});
+
+	//使用者結束輸入訊息
+	socket.on('stop typing', function(){
+		socket.broadcast.emit('stop typing', {nickname: socket.nickname});
 	});
 });
 
