@@ -5,6 +5,8 @@ app.controller('chatCtrl', ['$scope', 'socket', '$timeout', function ($scope, so
 	$scope.color = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
 	$scope.messages = [];
 
+	var typingUser = {};
+
 	$scope.login = function(){
 		socket.emit('addUser', {nickname: $scope.nickname, color: $scope.color})
 	};
@@ -62,16 +64,54 @@ app.controller('chatCtrl', ['$scope', 'socket', '$timeout', function ($scope, so
 		$scope.messages.push(msg);
 		$scope.text = '';
 		socket.emit("addMessage", msg);
-
 		$scope.scrollBottom();
 	};
 
+	//捲動捲軸到底
 	$scope.scrollBottom = function(){
 		$timeout(function(){
-			var messageWrapper= $('.message-wrapper');
+			var messageWrapper = $('.message-wrapper');
 			messageWrapper.scrollTop(messageWrapper[0].scrollHeight);
 		});
 	};
+
+	var typing = false;
+
+	//使用者輸入訊息
+	$scope.userTyping = function(){
+		if (!typing){
+			typing = true;
+
+			socket.emit('typing', {color: $scope.color, nickname: $scope.nickname, time: new Date()});
+		}
+
+		if (typeof(typingTimer) != 'undefined'){
+			$timeout.cancel(typingTimer);
+			delete typingTimer;
+		}
+
+		typingTimer = $timeout(function() {
+			if (typing){
+				typing = false;
+
+				socket.emit('stop typing');
+			}
+		}, 2000);
+
+	};
+
+	//接收到使用者輸入訊息
+	socket.on('typing', function(data){
+		var msg = {type: 'typing', isTyping: true, from: data.nickname, color: data.color};
+		typingUser[data.nickname] = msg;
+
+		$scope.messages.push(msg);
+	});
+
+	//接收到使用者取消輸入訊息
+	socket.on('stop typing', function(data){
+		typingUser[data.nickname].isTyping = false;
+	});
 
 }]);
 

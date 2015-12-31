@@ -35,30 +35,42 @@
 			<div class="message-wrapper panel-body">
 				<div ng-repeat="message in messages">
 					<!-- 使用者加入 -->
-					<div class="system-notification" ng-show="message.type=='welcome'">
+					<div class="system-notification" ng-show="message.type == 'welcome'">
 						<strong>系統：</strong>
 						{{ message.user }} 進入聊天室
 					</div>
 					<!-- 使用者離開 -->
-					<div class="system-notification" ng-show="message.type=='bye'">
+					<div class="system-notification" ng-show="message.type == 'bye'">
 						<strong>系統：</strong>
 						{{ message.user }} 離開聊天室
 					</div>
 					<!-- 一般訊息 -->
-					<div class="normal-message" ng-class="{'others':nickname!=message.from,'self':nickname==message.from}" ng-show="message.type=='normal'">
+					<div class="normal-message" ng-class="{'others':nickname!=message.from,'self':nickname==message.from}" ng-show="message.type == 'normal'">
 						<div class="name-wrapper">
-							<span>{{ message.from }} @ </span>
+							<span style="color: {{ message.color }}">{{ message.from }}</span>
+							<span>@</span>
 							<span>{{ message.time | date: 'HH:mm:ss' }}</span>
 						</div>
 						<div class="content-wrapper">
 							<span class="content">{{ message.text }}</span>
 						</div>
 					</div>
+					<!-- 使用者輸入訊息 -->
+					<div class="normal-message others" ng-show="message.type == 'typing' && message.isTyping == true">
+						<div class="name-wrapper">
+							<strong style="color: {{ message.color }}">{{ message.from }}</strong>
+							<span>@</span>
+							<span>{{ message.time | date: 'HH:mm:ss' }}</span>
+						</div>
+						<div class="content-wrapper">
+							<span class="content" >正在輸入訊息...</span>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div class="panel-footer">
 				<form name="postform" ng-submit="postMessage();" class="post-form form-inline">
-					<input type="text" class="form-control" ng-model="text" placeholder="訊息內容" required>
+					<input type="text" class="form-control" autofocus ng-model="text" ng-change="userTyping();" placeholder="訊息內容" required>
 					<button type="submit" class="btn btn-success" ng-disabled="postform.$invalid">傳送</button>
 				</form>
 			</div>
@@ -72,7 +84,7 @@
 				<label for="nickname"></label>
 				<div class="input-group">
 					<div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
-					<input type="text" id="nickname" placeholder="使用者名稱" ng-model="nickname" required/>
+					<input type="text" style="height: 30px" id="nickname" autofocus placeholder="使用者名稱" ng-model="nickname" required/>
 				</div>
 			</div>
 			<button type="submit" class="btn btn-primary" ng-disabled="userform.$invalid">登入</button>
